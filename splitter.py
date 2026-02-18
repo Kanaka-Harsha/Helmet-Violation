@@ -3,7 +3,7 @@ import os
 import random
 import shutil
 
-VIDEO_PATH = "Videos/Main.mp4" 
+VIDEO_DIR = "Videos" 
 DATASET_DIR = "dataset"
 TRAIN_RATIO = 0.8
 VAL_RATIO = 0.2
@@ -28,7 +28,7 @@ def create_directory_structure(base_dir):
         os.makedirs(path, exist_ok=True)
         print(f"Created: {path}")
 
-def split_video(video_path, dataset_dir, train_ratio=0.8, val_ratio=0.2, interval_seconds=1):
+def split_video(video_path, video_name, dataset_dir, train_ratio=0.8, val_ratio=0.2, interval_seconds=1):
     """Splits video frames into train/val dataset folders."""
     
     if not os.path.exists(video_path):
@@ -66,13 +66,13 @@ def split_video(video_path, dataset_dir, train_ratio=0.8, val_ratio=0.2, interva
             else:
                 split = "val"
                 
-            image_name = f"frame_{saved_count:06d}.jpg"
+            image_name = f"{video_name}_frame_{saved_count:06d}.jpg"
             save_path = os.path.join(dataset_dir, "images", split, image_name)
             
             cv2.imwrite(save_path, frame)
             
             # Create corresponding empty label file
-            label_name = f"frame_{saved_count:06d}.txt"
+            label_name = f"{video_name}_frame_{saved_count:06d}.txt"
             label_path = os.path.join(dataset_dir, "labels", split, label_name)
             with open(label_path, 'w') as f:
                 pass # Create empty file
@@ -89,4 +89,20 @@ def split_video(video_path, dataset_dir, train_ratio=0.8, val_ratio=0.2, interva
 
 if __name__ == "__main__":
     create_directory_structure(DATASET_DIR)
-    split_video(VIDEO_PATH, DATASET_DIR, TRAIN_RATIO, VAL_RATIO, INTERVAL_SECONDS)
+    
+    if not os.path.exists(VIDEO_DIR):
+        print(f"Error: Video directory '{VIDEO_DIR}' not found.")
+        exit(1)
+
+    video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
+    video_files = [f for f in os.listdir(VIDEO_DIR) if f.lower().endswith(video_extensions)]
+
+    if not video_files:
+        print(f"No video files found in {VIDEO_DIR}")
+    else:
+        print(f"Found {len(video_files)} videos: {video_files}")
+        for video_file in video_files:
+            video_path = os.path.join(VIDEO_DIR, video_file)
+            video_name = os.path.splitext(video_file)[0]
+            print(f"\n--- Processing {video_file} ---")
+            split_video(video_path, video_name, DATASET_DIR, TRAIN_RATIO, VAL_RATIO, INTERVAL_SECONDS)
