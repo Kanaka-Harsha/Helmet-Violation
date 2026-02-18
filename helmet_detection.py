@@ -6,12 +6,14 @@ from ultralytics import YOLO
 VIDEO_PATH = "Videos/vlc-record-2026-02-18-12h37m29s-rtsp___192.168.1.10_Streaming_Channels_101--converted.mp4"
 MODEL_PATH = "best.pt"
 OUTPUT_FOLDER = "violations_evidence"
+NO_HELMET_FOLDER = "no_helmet_bikes"
+PLATE_LOG_FILE = os.path.join(NO_HELMET_FOLDER, "detected_plates.txt")
 
 CLASS_IDS = {
-    'bike': 0,         # Replace with your actual ID for bike
-    'no_helmet': 1,    # Replace with your actual ID for no_helmet
-    'helmet': 2,       # Replace with your actual ID for helmet
-    'numberplate': 3   # Replace with your actual ID for numberplate
+    'bike': 0,
+    'no_helmet': 1,
+    'helmet': 2,
+    'numberplate': 3
 }
 
 def get_center(box):
@@ -37,6 +39,10 @@ def is_overlap(box1, box2):
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
     print(f"📁 Created folder: {OUTPUT_FOLDER}")
+
+if not os.path.exists(NO_HELMET_FOLDER):
+    os.makedirs(NO_HELMET_FOLDER)
+    print(f"📁 Created folder: {NO_HELMET_FOLDER}")
 
 # 2. Load the Model
 print("🧠 Loading Model...")
@@ -116,6 +122,24 @@ while True:
         elif not violation_detected:
             continue # No helmet/no-helmet detected, skip (uncertain)
 
+        # 📸 Save No-Helmet Bike Image (Independent of Plate)
+        if violation_detected:
+            # Format filenames
+            img_name_bike_no_helmet = f"{NO_HELMET_FOLDER}/bike_{frame_count}_{bike_box[0]}_{bike_box[1]}.jpg"
+            
+            # Crop and Save Bike
+            bx1, by1, bx2, by2 = bike_box
+            h, w, _ = frame.shape
+            bx1, by1 = max(0, bx1), max(0, by1)
+            bx2, by2 = min(w, bx2), min(h, by2)
+            
+            crop_bike = frame[by1:by2, bx1:bx2]
+            try:
+                cv2.imwrite(img_name_bike_no_helmet, crop_bike)
+                # print(f"📸 Saved no-helmet bike: {img_name_bike_no_helmet}")
+            except Exception as e:
+                print(f"Error saving image: {e}")
+
         # Check 2: If violation, find the closest number plate
         if violation_detected:
             closest_plate = None
@@ -154,7 +178,17 @@ while True:
                 crop_plate = frame[py1:py2, px1:px2]
                 cv2.imwrite(img_name_plate, crop_plate)
                 
+                crop_plate = frame[py1:py2, px1:px2]
+                cv2.imwrite(img_name_plate, crop_plate)
+                
                 print(f"📸 VIOLATION CAPTURED: Frame {frame_count}")
+
+                # 📝 Log Plate Detection
+                try:
+                    with open(PLATE_LOG_FILE, "a") as f:
+                        f.write(f"Frame {frame_count}: Plate detected at {closest_plate}\n")
+                except Exception as e:
+                    print(f"Error logging plate: {e}")
                 
                 # Draw visual feedback on the live feed (Optional)
                 cv2.rectangle(frame, (bx1, by1), (bx2, by2), (0, 0, 255), 2) # Red box on bike
