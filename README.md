@@ -1,4 +1,4 @@
-# Advanced Computer Vision & Deep Learning Toolkit
+# Deep Learning And Computer Vision Projects
 
 This repository contains multiple real-time computer vision and deep learning applications built using **OpenCV** and **Ultralytics YOLOv8**. The projects focus on object detection, tracking, safety compliance, and analytics across different scenarios.
 
