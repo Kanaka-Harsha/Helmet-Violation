@@ -1,0 +1,22 @@
+Download the zip file onto desktop  and extract to desktop.
+Login (or) create(Get Started) account in roboflow -> www.roboflow.com
+Name your workspace -> (Your Name), then create your workspace
+Open projects section on the left -> New Project
+Project Name: (Your assigned batch number)
+Annotations group: Helmet-NoHelmet 
+Select public project and create
+Use traditional model builder
+Select "Select Folder" -> Upload the downloaded folder
+Batch name: (Your batch number)
+Save and Continue
+If showed duplicates... -> Click continue
+On the right side select Label myself
+Select Start Annotating in the top middle
+Draw boxes in each picture of bike, helmet/no helmet, numberplate
+Click on the right arrow in the top middle(not tick button)
+Do the same for all images and then click tick button
+Add Images
+Go to datasets and verify if all the labeled images are present
+Select versions on left and select new version, click continue.. and create
+Click download dataset -> Select format Yolov8, Download ZIP to computer
+Download the dataset in ZIP and send in group
